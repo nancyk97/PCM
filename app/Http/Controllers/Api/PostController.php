@@ -8,4 +8,10 @@ use Illuminate\Http\Request;
 class PostController extends Controller
 {
     // post controller    
+    public function index()
+    {
+        return response()->json([
+            'message' => 'Hello World'
+        ]);
+    }
 }
