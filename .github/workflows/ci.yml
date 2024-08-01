@@ -37,7 +37,7 @@ jobs:
         extensions: mbstring, xml, pdo, pdo_mysql
 
     - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+      run: composer install --prefer-dist --no-progress --no-suggest --ignore-platform-reqs
 
     - name: Copy .env
       run: cp .env.example .env
