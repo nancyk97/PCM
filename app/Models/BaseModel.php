@@ -17,14 +17,16 @@ class BaseModel extends Model
     protected static function booted()
     {
         static::creating(function ($model) {
-            if (!empty(request()->user()))
+            if (!empty(request()->user())) {
                 $model->created_by = request()->user()->id;
+            }
         });
 
 
         static::updating(function ($model) {
-            if (!empty(request()->user()))
+            if (!empty(request()->user())) {
                 $model->updated_by = request()->user()->id;
+            }
         });
     }
 
