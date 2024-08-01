@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    // post controller    
+    // post controller
     public function index()
     {
         return response()->json([

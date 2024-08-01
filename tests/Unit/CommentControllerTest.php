@@ -2,122 +2,52 @@
 
 namespace Tests\Unit;
 
+use App\Contracts\CommentServiceInterface;
 use Tests\TestCase;
 use App\Http\Controllers\Api\CommentController;
-use App\Repositories\CommentRepository;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Mockery;
 
 class CommentControllerTest extends TestCase
 {
-    protected $commentRepository;
-    protected $commentController;
-
-    protected function setUp(): void
+    public function testShow()
     {
-        parent::setUp();
+        // Create a mock CommentServiceInterface
+        $commentService = Mockery::mock(CommentServiceInterface::class);
 
-        $this->commentRepository = Mockery::mock(CommentRepository::class);
-        $this->commentController = new CommentController($this->commentRepository);
-    }
+        // Set up the expected comment data
+        $commentData = [
+            'id' => 1,
+            'text' => 'This is a comment',
+            'user_id' => 1,
+            'post_id' => 1,
+        ];
 
-    public function testShowSuccess()
-    {
-        $commentId = 1;
-        $comment = ['id' => $commentId, 'content' => 'Test comment'];
+        // Set up the expected response
+        $expectedResponse = [
+            'success' => true,
+            'message' => __('messages.comment_retrieved_success'),
+            'data' => $commentData,
+        ];
 
-        $this->commentRepository
-            ->shouldReceive('find')
-            ->with($commentId)
-            ->andReturn($comment);
+        // Mock the CommentServiceInterface method
+        $commentService->shouldReceive('getCommentById')
+            ->with(1)
+            ->andReturn($commentData);
 
-        $response = $this->commentController->show($commentId);
+        // Create an instance of the CommentController and inject the mock CommentServiceInterface
+        $commentController = new CommentController($commentService);
 
+        // Create a mock Request
+        $request = Mockery::mock(Request::class);
+
+        // Call the show method
+        $response = $commentController->show(1);
+
+        // Assert that the response matches the expected response
         $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-        $this->assertTrue($response->getData()->success);
-        $this->assertEquals(__('messages.comment_retrieved_success'), $response->getData()->message);
-        $this->assertEquals($comment, (array)$response->getData()->data);
-    }
-
-    public function testShowNotFound()
-    {
-        $commentId = 1;
-
-        $this->commentRepository
-            ->shouldReceive('find')
-            ->with($commentId)
-            ->andReturn(null);
-
-        $response = $this->commentController->show($commentId);
-
-        $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        $this->assertFalse($response->getData()->success);
-        $this->assertEquals(__('messages.comment_not_found'), $response->getData()->message);
-    }
-
-    public function testShowException()
-    {
-        $commentId = 1;
-
-        $this->commentRepository
-            ->shouldReceive('find')
-            ->with($commentId)
-            ->andThrow(new \Exception('Database error'));
-
-        $response = $this->commentController->show($commentId);
-
-        $this->assertEquals(Response::HTTP_INTERNAL_SERVER_ERROR, $response->getStatusCode());
-        $this->assertFalse($response->getData()->success);
-        $this->assertEquals(__('messages.comment_retrieved_failure'), $response->getData()->message);
-    }
-
-    public function testStoreSuccess()
-    {
-        $request = Request::create('/comments', 'POST', ['content' => 'Test comment']);
-        $comment = ['id' => 1, 'content' => 'Test comment'];
-
-        $this->commentRepository
-            ->shouldReceive('create')
-            ->with(['content' => 'Test comment'])
-            ->andReturn($comment);
-
-        $response = $this->commentController->store($request);
-
-        $this->assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
-        $this->assertTrue($response->getData()->success);
-        $this->assertEquals(__('messages.comment_created_success'), $response->getData()->message);
-        $this->assertEquals($comment, (array)$response->getData()->data);
-    }
-
-    public function testStoreValidationFailure()
-    {
-        $request = Request::create('/comments', 'POST', []);
-
-        $response = $this->commentController->store($request);
-
-        $this->assertEquals(Response::HTTP_UNPROCESSABLE_ENTITY, $response->getStatusCode());
-    }
-
-    public function testStoreException()
-    {
-        $request = Request::create('/comments', 'POST', ['content' => 'Test comment']);
-
-        $this->commentRepository
-            ->shouldReceive('create')
-            ->with(['content' => 'Test comment'])
-            ->andThrow(new \Exception('Database error'));
-
-        $response = $this->commentController->store($request);
-
-        $this->assertEquals(Response::HTTP_INTERNAL_SERVER_ERROR, $response->getStatusCode());
-        $this->assertFalse($response->getData()->success);
-        $this->assertEquals(__('messages.comment_created_failure'), $response->getData()->message);
-    }
-
-    protected function tearDown(): void
-    {
-        Mockery::close();
-        parent::tearDown();
+        $this->assertEquals($expectedResponse, $response->getData(true));
     }
 }

@@ -11,7 +11,7 @@ trait ApiResponseTrait
      * @param $message
      * @return JsonResponse
      */
-    public function sendSuccessResponse($message, $data = []) : JsonResponse
+    public function sendSuccessResponse($message, $data = []): JsonResponse
     {
         $response = [
             'success' => true,
