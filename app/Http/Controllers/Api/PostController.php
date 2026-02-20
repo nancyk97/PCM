@@ -11,7 +11,8 @@ class PostController extends Controller
     public function index()
     {
         return response()->json([
-            'message' => 'Hello World1'
+            'message' => 'test ci cd'
+            
         ]);
     }
 }
